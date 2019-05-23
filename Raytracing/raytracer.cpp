@@ -10,10 +10,6 @@
 
 #include "settings.h"
 
-//#ifdef _WIN32
-	
-//#endif
-
 #if defined __linux__ || defined __APPLE__
 // "Compiled for Linux
 #else
@@ -91,12 +87,6 @@ public:
         return true;
     }
 };
-
-// Diese Konstante kontrolliert die max. Strahlentiefe
-//#define MAX_RAY_DEPTH 12
-//#define SHADOW_RAYS 5000.0
-//#define OFFSET_PERCENT 3.50
-//#define MIN_SHADOW_BRIGHTNESS 0.15
 
 float mix(const float &a, const float &b, const float &mix)
 {
@@ -259,7 +249,7 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     
-	std::cout << "Berechnungszeit: " << duration << "us";
+	std::cout << "Berechnungszeit: " << (duration/1000) << "." << (duration%1000) << "ms";
 	getchar();
     return 0;
 }
