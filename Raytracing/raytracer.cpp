@@ -213,7 +213,6 @@ void renderBlock(unsigned left, unsigned top){
 
     for (unsigned y = top; y < BLOCK_HEIGHT + top; ++y) {
         for (unsigned x = left; x < BLOCK_WIDTH + left; ++x) {
-            //std::cout << "(" << x << ", " << y << ")" << std::endl;
             float xx = (2 * ((x + 0.5) * invWidth) - 1) * angle * aspectratio;
             float yy = (1 - 2 * ((y + 0.5) * invHeight)) * angle;
             Vec3f raydir(xx, yy, -1);
@@ -226,7 +225,6 @@ void renderBlock(unsigned left, unsigned top){
 void threadMain(){
     mtx.lock();
     while(blocks.size() > 0){
-        //std::cout << blocks.size() << " blocks remaining" << std::endl;
         unsigned left = blocks.back().first;
         unsigned top = blocks.back().second;
         blocks.pop_back();
@@ -241,11 +239,7 @@ void threadMain(){
 // Trifft der Strahl eine Kugel geben wird die Farbe der Kugel am Schnittpunkt zurückgegeben,
 // falls nicht wird die Hintergrundfarbe zurückgegeben.
 void render(){
-    //unsigned width = 640, height = 480;
     image = new Vec3f[width * height];
-    /*float invWidth = 1 / float(width), invHeight = 1 / float(height);
-    float aspectratio = width / float(height);
-    float angle = tan(M_PI * 0.5 * fov / 180.);*/
     // Strahlen verfolgen
     if((width % BLOCK_WIDTH != 0) || (height % BLOCK_HEIGHT != 0)){
         std::cout << "invalid blocksize, check settings.h" << std::endl;
@@ -254,20 +248,9 @@ void render(){
 
     for(unsigned i = 0; i < width; i += BLOCK_WIDTH){
         for(unsigned j = 0; j < height; j += BLOCK_HEIGHT){
-            //std::cout << "(" << i << ", " << j << ")" << std::endl;
             blocks.push_back(std::make_pair(i, j));   //top left of each block
         }
     }
-
-    /*for (unsigned y = 0; y < height; ++y) {
-        for (unsigned x = 0; x < width; ++x, ++pixel) {
-            float xx = (2 * ((x + 0.5) * invWidth) - 1) * angle * aspectratio;
-            float yy = (1 - 2 * ((y + 0.5) * invHeight)) * angle;
-            Vec3f raydir(xx, yy, -1);
-            raydir.normalize();
-            *pixel = trace(Vec3f(0), raydir, spheres, 0);
-        }
-    }*/
 
     std::thread threads[THREAD_COUNT];
     for(int i = 0; i < THREAD_COUNT; i++){
@@ -295,7 +278,6 @@ int main(int argc, char **argv)
 {
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
-    //std::vector<Sphere> spheres;
     // position, radius, farbe, reflektivität, transparenz, emission color
     spheres.push_back(Sphere(Vec3f( 0.0, -10004, -20), 10000, Vec3f(0.20, 0.20, 0.20), 0, 0.0));
     spheres.push_back(Sphere(Vec3f( 0.0,      0, -20),     4, Vec3f(1.00, 0.32, 0.36), 1, 0.5));
