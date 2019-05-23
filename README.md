@@ -3,7 +3,7 @@ A simple Raytracing-Algorithm based on the article of scrathpixel.
 Extended with soft shadows. This project was developed for the university of applied science karlsruhe (germany), course of study 'computer science', subject 'computer graphics'.
 Feel free to create pull requests!
 
-## Features (yet implemented)
+## Features (already implemented)
 * Spheres with transparency, emissive, reflective and surfaceColor
 * Reflection
 * Refraction
