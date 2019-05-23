@@ -8,9 +8,11 @@
 #include <algorithm>
 #include <chrono>
 
-#ifdef _WIN32
+#include "settings.h"
+
+//#ifdef _WIN32
 	
-#endif
+//#endif
 
 #if defined __linux__ || defined __APPLE__
 // "Compiled for Linux
@@ -91,10 +93,10 @@ public:
 };
 
 // Diese Konstante kontrolliert die max. Strahlentiefe
-#define MAX_RAY_DEPTH 12
-#define SHADOW_RAYS 5000.0
-#define OFFSET_PERCENT 3.50
-#define MIN_SHADOW_BRIGHTNESS 0.15
+//#define MAX_RAY_DEPTH 12
+//#define SHADOW_RAYS 5000.0
+//#define OFFSET_PERCENT 3.50
+//#define MIN_SHADOW_BRIGHTNESS 0.15
 
 float mix(const float &a, const float &b, const float &mix)
 {
