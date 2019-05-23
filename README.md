@@ -28,6 +28,22 @@ You can controll the quality of the shadows and the overall result in the settin
 ```C++
 #define MIN_SHADOW_BRIGHTNESS 0.15
 ```
+The options regarding the size of the created image, size of render blocks and number of threads the render is running in can be set as well.
+* Adjust the dimensions of the created image
+```C++
+#define width 640
+#define height 480
+```
+* Adjust the size of blocks that are rendered at once. These sizes have to perfectly divide width/ height.
+```C++
+#define BLOCK_WIDTH 40
+#define BLOCK_HEIGHT 30
+```
+* Adjust the number of threads.
+```C++
+#define THREAD_COUNT 4
+```
+
 
 ## Authors
 Author of the scratchpixel.com blog, @mbpictures, @vacl.
