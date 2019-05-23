@@ -276,6 +276,7 @@ void render(){
 // anschlieﬂend wird die Szene mit der 'render'-Funktion ausgegeben
 int main(int argc, char **argv)
 {
+    if(THREAD_COUNT <= 0) return;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
     // position, radius, farbe, reflektivit‰t, transparenz, emission color
