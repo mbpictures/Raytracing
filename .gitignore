@@ -336,4 +336,4 @@ ASALocalRun/
 #vacl
 Raytracing/Makefile
 Raytracing/renderer
-Raytracing/raytraced.ppm
+Raytracing/result.ppm

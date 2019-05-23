@@ -219,7 +219,7 @@ void render(const std::vector<Sphere> &spheres)
         }
     }
     // Speichere das Ergebnis in die Datei 'raytraced' (flags unter windows behalten!)
-    std::ofstream ofs("./raytraced.ppm", std::ios::out | std::ios::binary);
+    std::ofstream ofs("./result.ppm", std::ios::out | std::ios::binary);
     ofs << "P6\n" << width << " " << height << "\n255\n";
     for (unsigned i = 0; i < width * height; ++i) {
         ofs << (unsigned char)(std::min(float(1), image[i].x) * 255) <<
