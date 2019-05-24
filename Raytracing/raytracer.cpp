@@ -225,6 +225,7 @@ void renderBlock(unsigned left, unsigned top){
 void threadMain(){
     mtx.lock();
     while(blocks.size() > 0){
+        //std::cout << blocks.size() << " blocks remaining" << std::endl;
         unsigned left = blocks.back().first;
         unsigned top = blocks.back().second;
         blocks.pop_back();
@@ -276,7 +277,7 @@ void render(){
 // anschließend wird die Szene mit der 'render'-Funktion ausgegeben
 int main(int argc, char **argv)
 {
-    if(THREAD_COUNT <= 0) return;
+    if(THREAD_COUNT <= 0) return 0;
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
     // position, radius, farbe, reflektivität, transparenz, emission color
