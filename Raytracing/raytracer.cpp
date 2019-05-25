@@ -236,29 +236,53 @@ void threadMain(){
     mtx.unlock();
 }
 
+void renderSinglethreaded(){
+    float fov = 30.0, invWidth = 1 / float(width), invHeight = 1 / float(height);
+    float aspectratio = width / float(height);
+    float angle = tan(M_PI * 0.5 * fov / 180.);
+
+    std::cout << "rendering singlethreaded" << std::endl;
+
+    for (unsigned y = 0; y < height; ++y) {
+        for (unsigned x = 0; x < width; ++x) {
+            float xx = (2 * ((x + 0.5) * invWidth) - 1) * angle * aspectratio;
+            float yy = (1 - 2 * ((y + 0.5) * invHeight)) * angle;
+            Vec3f raydir(xx, yy, -1);
+            raydir.normalize();
+            image[y * width + x] = trace(Vec3f(0), raydir, spheres, 0);
+        }
+    }
+}
+
 // Render Funktion. Es wird ein Strahl pro Pixel berechnet und geben dessen Farbe zurück. 
 // Trifft der Strahl eine Kugel geben wird die Farbe der Kugel am Schnittpunkt zurückgegeben,
 // falls nicht wird die Hintergrundfarbe zurückgegeben.
 void render(){
     image = new Vec3f[width * height];
     // Strahlen verfolgen
-    if((width % BLOCK_WIDTH != 0) || (height % BLOCK_HEIGHT != 0)){
-        std::cout << "invalid blocksize, check settings.h" << std::endl;
-        return;
-    }
-
-    for(unsigned i = 0; i < width; i += BLOCK_WIDTH){
-        for(unsigned j = 0; j < height; j += BLOCK_HEIGHT){
-            blocks.push_back(std::make_pair(i, j));   //top left of each block
+    if(THREAD_COUNT == 1) renderSinglethreaded();
+    else{
+        if((width % BLOCK_WIDTH != 0) || (height % BLOCK_HEIGHT != 0)){
+            std::cout << "invalid blocksize, check settings.h" << std::endl;
+            delete [] image;
+            return;
         }
-    }
 
-    std::thread threads[THREAD_COUNT];
-    for(int i = 0; i < THREAD_COUNT; i++){
-        threads[i] = std::thread(threadMain);
-    }
-    for(int i = 0; i < THREAD_COUNT; i++){
-        threads[i].join();
+        for(unsigned i = 0; i < width; i += BLOCK_WIDTH){
+            for(unsigned j = 0; j < height; j += BLOCK_HEIGHT){
+                blocks.push_back(std::make_pair(i, j));   //top left of each block
+            }
+        }
+
+        std::cout << "split image into blocks, rendering in " << THREAD_COUNT << " threads" << std::endl;
+
+        std::thread threads[THREAD_COUNT];
+        for(int i = 0; i < THREAD_COUNT; i++){
+            threads[i] = std::thread(threadMain);
+        }
+        for(int i = 0; i < THREAD_COUNT; i++){
+            threads[i].join();
+        }
     }
 
     // Speichere das Ergebnis in die Datei 'result' (flags unter windows behalten!)
@@ -277,7 +301,10 @@ void render(){
 // anschließend wird die Szene mit der 'render'-Funktion ausgegeben
 int main(int argc, char **argv)
 {
-    if(THREAD_COUNT <= 0) return 0;
+    if(THREAD_COUNT <= 0){
+        std::cout << "invalid THREAD_COUNT, check settings.h" << std::endl;
+        return 0;
+    }
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
     // position, radius, farbe, reflektivität, transparenz, emission color
@@ -292,7 +319,7 @@ int main(int argc, char **argv)
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     
-	std::cout << "Berechnungszeit: " << (duration/1000) << "." << (duration%1000) << "ms";
+	std::cout << "Berechnungszeit: " << (duration/1000000) << "." << (duration%1000000) << "s";
 	getchar();
     return 0;
 }
