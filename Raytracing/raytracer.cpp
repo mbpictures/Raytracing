@@ -218,6 +218,7 @@ void renderBlock(unsigned left, unsigned top){
             Vec3f raydir(xx, yy, -1);
             raydir.normalize();
             image[y * width + x] = trace(Vec3f(0), raydir, spheres, 0);
+            std::this_thread::yield();
         }
     }
 }
