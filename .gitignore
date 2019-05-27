@@ -332,3 +332,8 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+#vacl
+Raytracing/Makefile
+Raytracing/renderer
+Raytracing/result.ppm
