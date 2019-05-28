@@ -11,6 +11,8 @@
 #include <utility>
 #include <mutex>
 
+#include <nanogui/nanogui.h>
+
 #include "settings.h"
 
 #if defined __linux__ || defined __APPLE__

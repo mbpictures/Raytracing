@@ -122,6 +122,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Documents\GitHub\nanogui\build\nanogui.vcxproj">
+      <Project>{6fe22733-582c-3d79-84d9-b76ae6c8531f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Documents\GitHub\nanogui\build\ZERO_CHECK.vcxproj">
+      <Project>{302a0f3e-5ea8-359d-a7e8-ad6a3f6b90bd}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

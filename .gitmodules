@@ -1,0 +1,3 @@
+[submodule "Raytracing/ext/nanogui"]
+	path = Raytracing/ext/nanogui
+	url = https://github.com/wjakob/nanogui.git
