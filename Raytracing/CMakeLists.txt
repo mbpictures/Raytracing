@@ -84,9 +84,7 @@ include_directories(${NANOGUI_EXTRA_INCS})
 add_definitions(${NANOGUI_EXTRA_DEFS})
 
 # Compile a target using NanoGUI
-add_executable(${PROJECT_NAME} 
-   ${SRC_FILES}
-)
+add_executable(Raytracing ${SRC_FILES})
 # Lastly, additional libraries may have been built for you.  In addition to linking
 # against NanoGUI, we need to link against those as well.
 target_link_libraries(Raytracing nanogui ${NANOGUI_EXTRA_LIBS})

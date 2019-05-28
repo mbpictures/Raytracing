@@ -10,10 +10,14 @@
 #include <thread>
 #include <utility>
 #include <mutex>
+#include <iostream>
 
 #include <nanogui/nanogui.h>
+#include <nanogui/screen.h>
 
 #include "settings.h"
+
+using namespace nanogui;
 
 #if defined __linux__ || defined __APPLE__
 // "Compiled for Linux
@@ -300,14 +304,55 @@ void render(){
     delete [] image;
 }
 
+Screen *screen = nullptr;
+enum test_enum {
+	Item1 = 0,
+	Item2,
+	Item3
+};
+bool bvar = true;
+int maxRayDepth = 12;
+int shadowRays = 32;
+double rayOffset = 3.5;
+std::chrono::high_resolution_clock::time_point t1;
+std::chrono::high_resolution_clock::time_point t2;
 // In der Main function wird die Scene bestehend aus 5 Kugeln und einem Licht (das auch eine Kugel ist)
 // anschlieﬂend wird die Szene mit der 'render'-Funktion ausgegeben
 int main(int argc, char **argv)
 {
+	nanogui::init();
     if(THREAD_COUNT <= 0){
         std::cout << "invalid THREAD_COUNT, check settings.h" << std::endl;
         return 0;
     }
+
+	//Init GUI
+	screen = new Screen(Vector2i(500, 700), "Raytracer");
+
+	{
+		bool enabled = true;
+		FormHelper *gui = new FormHelper(screen);
+		ref<Window> window = gui->addWindow(Eigen::Vector2i(10, 10), "Settings");
+		gui->addVariable("Max. Ray Depth", maxRayDepth)->setSpinnable(true);
+		gui->addVariable("Amount of Shadow Rays", shadowRays);
+		gui->addVariable("Shadow Ray offset (%)", rayOffset)->setSpinnable(true);
+
+		
+
+		gui->addButton("Render!", []() {
+			t1 = std::chrono::high_resolution_clock::now();
+			render();
+		});
+		screen->setVisible(true);
+		screen->performLayout();
+		window->center();
+
+		nanogui::mainloop();
+	}
+
+	nanogui::shutdown();
+
+
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
     // position, radius, farbe, reflektivit‰t, transparenz, emission color
@@ -318,7 +363,7 @@ int main(int argc, char **argv)
     spheres.push_back(Sphere(Vec3f(-5.5,      0, -15),     3, Vec3f(0.90, 0.90, 0.90), 1, 0.0));
     // light
     spheres.push_back(Sphere(Vec3f( 0.0,     20, -30),     3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3)));
-    render();
+    
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     
