@@ -15,9 +15,22 @@
 #include <nanogui/nanogui.h>
 #include <nanogui/screen.h>
 
-#include "settings.h"
+#include "../inc/settings.h"
+#include "../inc/canvas.h"
 
 using namespace nanogui;
+
+
+Screen *screen = nullptr;
+int maxRayDepth = 12;
+int shadowRays = 32;
+double rayOffset = 3.5;
+double minShadowBrightness = 0.15;
+Canvas2D *canvas2d;
+std::chrono::high_resolution_clock::time_point t1;
+std::chrono::high_resolution_clock::time_point t2;
+
+
 
 #if defined __linux__ || defined __APPLE__
 // "Compiled for Linux
@@ -145,7 +158,7 @@ Vec3f trace(
     float bias = 1e-4; // Bias zum Strahlenpunkt hinzuf¸gen
     bool inside = false;
     if (raydir.dot(nhit) > 0) nhit = -nhit, inside = true;
-    if ((sphere->transparency > 0 || sphere->reflection > 0) && depth < MAX_RAY_DEPTH) {
+    if ((sphere->transparency > 0 || sphere->reflection > 0) && depth < maxRayDepth) {
         float facingratio = -raydir.dot(nhit);
         // zum Anpassen des Effektes den MIX-Wert ‰ndern
         float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
@@ -179,11 +192,11 @@ Vec3f trace(
 
 				int raysInShadow = 0;
 
-				for (int x = 0; x < SHADOW_RAYS; x++) {
-					double minOff = 1.0 - OFFSET_PERCENT;
-					double maxOff = 1.0 + OFFSET_PERCENT;
+				for (int x = 0; x < shadowRays; x++) {
+					double minOff = 1.0 - rayOffset;
+					double maxOff = 1.0 + rayOffset;
 					Vec3f random = Vec3f(fRand(minOff, maxOff), fRand(minOff, maxOff), fRand(minOff, maxOff));
-					Vec3f lightDirectionOffset = SHADOW_RAYS > 1.0 ? lightDirection * random : lightDirection;
+					Vec3f lightDirectionOffset = shadowRays > 1.0 ? lightDirection * random : lightDirection;
 					//Vec3f lightDirectionOffset = spheres[i]
 					lightDirectionOffset.normalize();
 					for (unsigned j = 0; j < spheres.size(); ++j) {
@@ -197,7 +210,7 @@ Vec3f trace(
 						}
 					}
 				}
-				transmission = std::min(1.0, MIN_SHADOW_BRIGHTNESS + (1.0 - (raysInShadow / SHADOW_RAYS)));
+				transmission = std::min(1.0, minShadowBrightness + (1.0 - (raysInShadow / shadowRays)));
 				surfaceColor += sphere->surfaceColor * transmission *
 					std::max(float(0), nhit.dot(lightDirection)) * spheres[i].emissionColor;
 			}
@@ -223,7 +236,9 @@ void renderBlock(unsigned left, unsigned top){
             float yy = (1 - 2 * ((y + 0.5) * invHeight)) * angle;
             Vec3f raydir(xx, yy, -1);
             raydir.normalize();
-            image[y * width + x] = trace(Vec3f(0), raydir, spheres, 0);
+			Vec3f renderedPixel = trace(Vec3f(0), raydir, spheres, 0);
+			image[y * width + x] = renderedPixel;
+			canvas2d->drawPixel(renderedPixel.x, renderedPixel.y, renderedPixel.z, x, y);
             std::this_thread::yield();
         }
     }
@@ -304,18 +319,7 @@ void render(){
     delete [] image;
 }
 
-Screen *screen = nullptr;
-enum test_enum {
-	Item1 = 0,
-	Item2,
-	Item3
-};
-bool bvar = true;
-int maxRayDepth = 12;
-int shadowRays = 32;
-double rayOffset = 3.5;
-std::chrono::high_resolution_clock::time_point t1;
-std::chrono::high_resolution_clock::time_point t2;
+
 // In der Main function wird die Scene bestehend aus 5 Kugeln und einem Licht (das auch eine Kugel ist)
 // anschlieﬂend wird die Szene mit der 'render'-Funktion ausgegeben
 int main(int argc, char **argv)
@@ -327,25 +331,42 @@ int main(int argc, char **argv)
     }
 
 	//Init GUI
-	screen = new Screen(Vector2i(500, 700), "Raytracer");
+	screen = new Screen(Vector2i(1050, 700), "Raytracer");
 
 	{
 		bool enabled = true;
 		FormHelper *gui = new FormHelper(screen);
-		ref<Window> window = gui->addWindow(Eigen::Vector2i(10, 10), "Settings");
+		ref<Window> window2 = gui->addWindow(Eigen::Vector2i(10, 10), "Settings");
+
+		Window *window = new Window(screen, "Render");
+		window->setPosition(Vector2i(350, 15));
+		window->setSize(Vector2i(640, 480));
+		window->setLayout(new GroupLayout());
+
+		canvas2d = new Canvas2D(window, 640, 480);
+
+
 		gui->addVariable("Max. Ray Depth", maxRayDepth)->setSpinnable(true);
 		gui->addVariable("Amount of Shadow Rays", shadowRays);
 		gui->addVariable("Shadow Ray offset (%)", rayOffset)->setSpinnable(true);
-
+		gui->addVariable("Min Shadow Brightness", minShadowBrightness)->setSpinnable(true);
 		
 
 		gui->addButton("Render!", []() {
+			// position, radius, farbe, reflektivit‰t, transparenz, emission color
+			spheres.push_back(Sphere(Vec3f(0.0, -10004, -20), 10000, Vec3f(0.20, 0.20, 0.20), 0, 0.0));
+			spheres.push_back(Sphere(Vec3f(0.0, 0, -20), 4, Vec3f(1.00, 0.32, 0.36), 1, 0.5));
+			spheres.push_back(Sphere(Vec3f(5.0, -1, -15), 2, Vec3f(0.90, 0.76, 0.46), 1, 0.0));
+			spheres.push_back(Sphere(Vec3f(5.0, 0, -25), 3, Vec3f(0.65, 0.77, 0.97), 1, 0.0));
+			spheres.push_back(Sphere(Vec3f(-5.5, 0, -15), 3, Vec3f(0.90, 0.90, 0.90), 1, 0.0));
+			// light
+			spheres.push_back(Sphere(Vec3f(0.0, 20, -30), 3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3)));
 			t1 = std::chrono::high_resolution_clock::now();
 			render();
 		});
 		screen->setVisible(true);
 		screen->performLayout();
-		window->center();
+		//window->center();
 
 		nanogui::mainloop();
 	}
@@ -355,14 +376,7 @@ int main(int argc, char **argv)
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
     srand48(13);
-    // position, radius, farbe, reflektivit‰t, transparenz, emission color
-    spheres.push_back(Sphere(Vec3f( 0.0, -10004, -20), 10000, Vec3f(0.20, 0.20, 0.20), 0, 0.0));
-    spheres.push_back(Sphere(Vec3f( 0.0,      0, -20),     4, Vec3f(1.00, 0.32, 0.36), 1, 0.5));
-    spheres.push_back(Sphere(Vec3f( 5.0,     -1, -15),     2, Vec3f(0.90, 0.76, 0.46), 1, 0.0));
-    spheres.push_back(Sphere(Vec3f( 5.0,      0, -25),     3, Vec3f(0.65, 0.77, 0.97), 1, 0.0));
-    spheres.push_back(Sphere(Vec3f(-5.5,      0, -15),     3, Vec3f(0.90, 0.90, 0.90), 1, 0.0));
-    // light
-    spheres.push_back(Sphere(Vec3f( 0.0,     20, -30),     3, Vec3f(0.00, 0.00, 0.00), 0, 0.0, Vec3f(3)));
+    
     
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();

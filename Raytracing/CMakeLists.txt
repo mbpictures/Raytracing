@@ -9,8 +9,8 @@ set(PROJECT_NAME Raytracing)
 set(OUTPUT_DEBUG Debug/bin)
 set(OUTPUT_RELEASE Release/bin)
 # Folders files
-set(CPP_DIR_1 ./)
-set(CPP_DIR_2 ./)
+set(CPP_DIR_1 ./src/)
+set(CPP_DIR_2 ./inc/)
 
 ############## CMake Project ################
 #        The main options of project        #
@@ -69,7 +69,7 @@ endif(NOT MSVC)
 
 file(GLOB SRC_FILES
     ${CPP_DIR_1}/*.cpp
-    ${CPP_DIR_2}/*.cpp
+    ${CPP_DIR_2}/*.h
 )
 
 # Disable building extras we won't need (pure C++ project)
